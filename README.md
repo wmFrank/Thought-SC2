@@ -1,7 +1,9 @@
 # Thought-SC2
 
 ## Update
-We have changed the name from "Mind-Game" to "Thought-Game" to prevent confusion.
+- Add Deep Q-Learning algorithm(DQN) and achieve a win rate of 80% against the default agent.
+
+- We have changed the name from "Mind-Game" to "Thought-Game" to prevent confusion.
 
 ## Introduction
 
