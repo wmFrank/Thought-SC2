@@ -1,0 +1,119 @@
+# 配置用户和sudo权限
+// 增加用户
+adduser username
+// 配置sudo权限
+sudo usermod -aG sudo username
+
+# 安装CUDA driver
+
+
+# 安装Anaconda
+
+// 郭海峰建议用miniconda
+
+
+# 配置conda清华源
+修改用户目录下的 .condarc
+内容如下：
+channels:
+  - defaults
+show_channel_urls: true
+default_channels:
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/r
+custom_channels:
+  conda-forge: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  msys2: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  bioconda: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  menpo: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  pytorch: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  simpleitk: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+如果发现SSLError(MaxRetryError('HTTPSConnectionPool(host=\'mirrors.tuna.tsinghua.edu.cn\', port=443): 这种类似的错误
+就在所有的mirrors后面加一个4，改成例如https://mirrors4.tuna.tsinghua.edu.cn/anaconda/pkgs/main的形式
+加4代表使用的ipv4的地址，加6代表使用ipv6的地址。不加代表自动选择。有的时候服务器抽风，无法区分ipv4和ipv6，所以手动增加。
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+# 用conda安装环境
+// tensorflow
+conda create -n tf_1_9 python=3.5 tensorflow-gpu=1.9.0
+
+tensorflow-cpu的版本就直接tensorflow=1.9.0
+
+// pytorch
+conda create -n th_4 python=3.6 pytorch=0.4 cudatoolkit=10.1 -c pytorch
+
+
+# 配置pip清华源
+mkdir .pip
+vim ~/.pip/pip.conf
+内容如下：
+[global]
+index-url = https://pypi.tuna.tsinghua.edu.cn/simple
+[install]
+trusted-host=mirrors.aliyun.com
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+如果https://pypi.tuna.tsinghua.edu.cn/simple用不了，则用mirrors.aliyun.com/pypi/simple
+
+[global]
+index-url = https://mirrors.aliyun.com/pypi/simple
+[install]
+trusted-host=mirrors.aliyun.com
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+# 用pip安装依赖包
+source activate th_4
+unzip pymarl.zip
+cd pymarl/pymarl
+pip install -r requirements.txt
+
+# 配置星际的位置
+export SC2PATH=`pwd`'/3rdparty/StarCraftII'
+
+
+# 运行
+
+// 前台执行
+python3 src/main.py --config=qmix --env-config=sc2 with env_args.map_name=3s5z
+
+// 后台执行
+nohup python3 src/main.py --config=qmix --env-config=sc2 with env_args.map_name=3s5z > 1.out &
+
+// 看执行情况
+tail -f 1.out
+
+// 移除不用的conda环境，如果有需要的话
+conda remove -n th_04 --all
+conda remove -n th_0_4 --all
+
+// 在有些环境下我们需要修改训练让它不出现游戏窗口，例如linux模式
+在 /home/liuruoze/anaconda3/envs/th_4/lib/python3.6/site-packages/smac/env/starcraft2/
+修改starcraft2.py文件
+want_rgb=False 在sc的start函数中增加这一个参数 (两个地方，一个是构造函数中，另一个是sc进程的start函数作为参数传递进去)
+
+wangming@114.212.189.244
+123456
+
+
+路通组刘若泽学长 2020/4/24 17:29:56
+为了备用，给你们两找了一台新的服务器。这台机器也是云服务器。如果之前的服务器无法使用的话就用这台新的。不过这台服务器不是我们团队独占的，实验室其他人也在用，因此注意不要再GPU资源占用太多。目前我们尽量只使用第5到第8块卡。GPU资源的使用可以用nvidia-smi查看。
+
+路通组刘若泽学长 2020/4/24 17:30:05
+IP: 210.28.133.13  port: 20057
+usename: wangming  password: 123456
+
+
+传文件scp -P 20104 C:\Users\HP\Desktop\for_linux\Miniconda3-latest-Linux-x86_64.sh wangming@210.28.133.13:/home/wangming/wangming_workspace/Miniconda3
+
+ssh -p 20104 wangming@210.28.133.13
+
+
+
+
+
+
+ssh -p 20057 wangming@210.28.133.13

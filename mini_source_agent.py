@@ -189,11 +189,9 @@ class MiniSourceAgent(base_agent.BaseAgent):
             if self.policy_flag and (not self.is_end):
 
                 state_now = self.mapping_source_to_mini_by_rule(self.get_the_input())
-                if self.greedy_action:
-                    action_prob, v_preds = self.net.policy.get_action_probs(state_now, verbose=False)
-                    action = np.argmax(action_prob)
-                else:
-                    action, v_preds = self.net.policy.get_action(state_now, verbose=False)
+
+                action = self.net.dqn.choose_action(state_now)
+                v_preds = 0
 
                 # print(ProtossAction(action).name)
                 self.mini_step(action)
@@ -201,10 +199,10 @@ class MiniSourceAgent(base_agent.BaseAgent):
                 if state_last is not None:
                     if 0:
                         print('state_last:', state_last, ', action_last:', action_last, ', state_now:', state_now)
-                    v_preds_next = self.net.policy.get_values(state_now)
-                    v_preds_next = self.get_values(v_preds_next)
+                    v_preds_next = 0
                     reward = 0
-                    self.local_buffer.append(state_last, action_last, state_now, reward, v_preds, v_preds_next)
+                    
+                    self.global_buffer.append(state_last, action_last, state_now, reward, v_preds, v_preds_next)
 
                 # continuous attack, consistent with mind-game
                 if action == ProtossAction.Attack.value:
@@ -218,10 +216,7 @@ class MiniSourceAgent(base_agent.BaseAgent):
 
             if self.is_end:
                 if self.rl_training:
-                    self.local_buffer.rewards[-1] += 1 * self.result['reward']  # self.result['win']
-                    print(self.local_buffer.rewards)
-                    self.global_buffer.add(self.local_buffer)
-                    print("add %d buffer!" % (len(self.local_buffer.rewards)))
+                    self.global_buffer.rewards[-1] += 1 * self.result['reward']
                 break
 
     def set_flag(self):

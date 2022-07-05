@@ -2,7 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-USED_DEVICES = "-1"
+USED_DEVICES = "7"
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = USED_DEVICES
@@ -40,8 +40,8 @@ from logging import warning as logging
 
 FLAGS = flags.FLAGS
 flags.DEFINE_bool("training", True, "Whether to train agents.")
-flags.DEFINE_bool("on_server", False, "Whether is running on server.")
-flags.DEFINE_integer("num_for_update", 100, "Number of episodes for each train.")
+flags.DEFINE_bool("on_server", True, "Whether is running on server.")
+flags.DEFINE_integer("num_for_update", 50, "Number of episodes for each train.")
 flags.DEFINE_string("log_path", "./logs/", "Path for log.")
 flags.DEFINE_string("device", USED_DEVICES, "Device for training.")
 
@@ -53,9 +53,9 @@ flags.DEFINE_integer("minimap_resolution", 64, "Resolution for minimap feature l
 
 flags.DEFINE_enum("agent_race", "P", sc2_env.races.keys(), "Agent's race.")
 flags.DEFINE_enum("bot_race", "T", sc2_env.races.keys(), "Bot's race.")
-flags.DEFINE_enum("difficulty", "7", sc2_env.difficulties.keys(), "Bot's strength.")
+flags.DEFINE_enum("difficulty", "1", sc2_env.difficulties.keys(), "Bot's strength.")
 flags.DEFINE_integer("max_agent_steps", 18000, "Total agent steps.")
-flags.DEFINE_integer("step_mul", 1, "Game steps per agent step.")
+flags.DEFINE_integer("step_mul", 8, "Game steps per agent step.")
 
 flags.DEFINE_bool("profile", False, "Whether to turn on code profiling.")
 flags.DEFINE_bool("trace", False, "Whether to trace the code execution.")
@@ -63,12 +63,12 @@ flags.DEFINE_bool("save_replay", False, "Whether to replays_save a replay at the
 flags.DEFINE_string("replay_dir", "multi-agent/", "dir of replay to replays_save.")
 
 flags.DEFINE_string("restore_model_path", "./model/20190122-215114_source/", "path for restore model")
-flags.DEFINE_bool("restore_model", True, "Whether to restore old model")
+flags.DEFINE_bool("restore_model", False, "Whether to restore old model")
 
 flags.DEFINE_integer("parallel", 10, "How many processes to run in parallel.")
 flags.DEFINE_integer("thread_num", 5, "How many thread to run in the process.")
-flags.DEFINE_integer("port_num", 4370, "the start port to create distribute tf")
-flags.DEFINE_integer("max_iters", 1, "the rl agent max run iters")
+flags.DEFINE_integer("port_num", 5370, "the start port to create distribute tf")
+flags.DEFINE_integer("max_iters", 10, "the rl agent max run iters")
 
 flags.DEFINE_string("game_version", None, "game version of SC2")
 FLAGS(sys.argv)
@@ -172,7 +172,8 @@ def run_thread(agent, game_num, Synchronizer, difficulty):
 
                         agent.update_network(Result_List)
                         Result_List.clear()
-                        agent.global_buffer.reset()
+                        print('buffershape',len(agent.global_buffer.rewards))
+                        #agent.global_buffer.reset()
 
                         Synchronizer.wait()
 

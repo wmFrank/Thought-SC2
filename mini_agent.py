@@ -127,10 +127,8 @@ class MiniAgent(A):
 
     def init_rl_param(self):
         self.policy = None
-        if self.global_buffer is not None:
-            self.policy = self.net.policy
-        else:
-            self.policy = self.net.policy_old
+
+        self.dqn = self.net.dqn
 
         self.state_last = None
         self.state_now = self.obs()
@@ -150,24 +148,20 @@ class MiniAgent(A):
             else:
                 final_reward = -1
 
-            self.local_buffer.rewards[-1] += final_reward
+            self.global_buffer.rewards[-1] += final_reward
             self._result = final_reward
 
-            if 0:
-                print(self.local_buffer.rewards)
-
             if self.global_buffer is not None:
-                # print(self.agent_id)
-                self.global_buffer.add(self.local_buffer)
+                a = 1
             return
 
         if self.state_last is not None:
-            v_preds_next = self.policy.get_values(self.state_now)
-            v_preds_next = self.get_values(v_preds_next)
+            v_preds_next = 0
             reward = 0
-            self.local_buffer.append(self.state_last, self.action_last, self.state_now, reward, self.v_preds, v_preds_next)
+            self.global_buffer.append(self.state_last, self.action_last, self.state_now, reward, self.v_preds, v_preds_next)
 
-        self.action, self.v_preds = self.policy.get_action(self.state_now, verbose=False)
+        self.action = self.dqn.choose_action(self.state_now)
+        self.v_preds = 0
         self.state_last = self.state_now
         self.state_now = self.get_next_state(self.action)
 

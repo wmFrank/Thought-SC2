@@ -15,6 +15,9 @@ class Buffer(object):
         self.values_next = []
         self.gaes = []
         self.returns = []
+        
+        self.memory_size = 2000 * 5
+        self.memory_counter = 0
 
     def reset(self):
         self.observations = []
@@ -29,14 +32,23 @@ class Buffer(object):
         self.returns = []
 
     def append(self, obs, tech_action, next_obs, reward, value, value_next):
-        self.observations.append(obs)
-        self.tech_actions.append(tech_action)
-        self.next_observations.append(next_obs)
-
-        self.rewards.append(reward)
-        self.values.append(value)
-        self.values_next.append(value_next)
-
+        if self.memory_counter < self.memory_size:
+            self.observations.append(obs)
+            self.tech_actions.append(tech_action)
+            self.next_observations.append(next_obs)
+            self.rewards.append(reward)
+            self.values.append(value)
+            self.values_next.append(value_next)
+        else:
+            index = self.memory_counter % self.memory_size
+            self.observations[index] = obs
+            self.tech_actions[index] = tech_action
+            self.next_observations[index] = next_obs
+            self.rewards[index] = reward
+            self.values[index] = value
+            self.values_next[index] = value_next
+        self.memory_counter += 1
+    
     def add(self, buffer, add_return=True):
 
         gaes = self.get_gaes(buffer.rewards, buffer.values, buffer.values_next)

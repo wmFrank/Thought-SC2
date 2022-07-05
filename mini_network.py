@@ -4,6 +4,7 @@ import tensorflow as tf
 import param as P
 
 from algo.ppo import Policy_net, PPOTrain
+from algo.dqn import DeepQNetwork
 
 # for mini game
 _SIZE_MINI_INPUT = 20
@@ -38,9 +39,6 @@ class MiniNetwork(object):
         self.sess.run(init_op)
 
     def reset_old_network(self):
-        self.policy_ppo.assign_policy_parameters()
-        self.policy_ppo.reset_mean_returns()
-
         self.sess.run(self.results_sum.assign(0))
         self.sess.run(self.game_num.assign(0))
 
@@ -64,9 +62,8 @@ class MiniNetwork(object):
             with tf.variable_scope(mini_scope):
                 ob_space = _SIZE_MINI_INPUT
                 act_space_array = _SIZE_MINI_ACTIONS
-                self.policy = Policy_net('policy', self.sess, ob_space, act_space_array)
-                self.policy_old = Policy_net('old_policy', self.sess, ob_space, act_space_array)
-                self.policy_ppo = PPOTrain('PPO', self.sess, self.policy, self.policy_old, lr=P.mini_lr, epoch_num=P.mini_epoch_num)
+                self.dqn = DeepQNetwork(self.sess,ob_space,act_space_array)
+
             var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
             self.policy_saver = tf.train.Saver(var_list=var_list)
 
@@ -80,9 +77,6 @@ class MiniNetwork(object):
 
     def Update_summary(self, counter):
         print("Update summary........")
-
-        policy_summary = self.policy_ppo.get_summary_dis()
-        self.summary_writer.add_summary(policy_summary, counter)
 
         summary = self.sess.run(self.merged)
         self.summary_writer.add_summary(summary, counter)
@@ -101,8 +95,7 @@ class MiniNetwork(object):
         return float(self.sess.run(self.win_rate))
 
     def Update_policy(self, buffer):
-        self.policy_ppo.ppo_train_dis(buffer.observations, buffer.tech_actions,
-                                      buffer.rewards, buffer.values, buffer.values_next, buffer.gaes, buffer.returns, verbose=False)
+        self.dqn.learn(buffer.observations,buffer.tech_actions,buffer.next_observations,buffer.rewards)
 
     def get_global_steps(self):
         return int(self.sess.run(self.global_steps))

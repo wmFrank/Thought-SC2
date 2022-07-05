@@ -2,7 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-USED_DEVICES = "-1"
+USED_DEVICES = "7"
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = USED_DEVICES
@@ -37,7 +37,7 @@ flags.DEFINE_integer("num_for_update", 500, "How many episodes for one iteration
 flags.DEFINE_integer("parallel", 10, "How many process to run, debug set to 1, training set to 10")
 flags.DEFINE_integer("thread_num", 5, "How many threads in one process, debug set to 1, training set to 5")
 flags.DEFINE_integer("port_num", 5370, "Port number for distribute training in tensorflow")
-flags.DEFINE_integer("train_iters", 35, "How many iterations for one training")
+flags.DEFINE_integer("train_iters", 20, "How many iterations for one training")
 
 flags.DEFINE_integer("initial_diff", 1, "The start level of opponent in mind-game")
 flags.DEFINE_float("win_rate_threshold", 0.95, "If win_rate exceeds this value, opponent level increase one")
@@ -109,7 +109,7 @@ def run_thread(agent, game_num, Synchronizer, difficulty):
 
                     agent.update_network(Result_List)
                     Result_List.clear()
-                    agent.global_buffer.reset()
+                    print('buffershape',len(agent.global_buffer.rewards))
                     Synchronizer.wait()
 
                     Update_Counter += 1
